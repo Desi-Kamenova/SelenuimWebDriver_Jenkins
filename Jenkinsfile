@@ -34,28 +34,19 @@ pipeline {
 
         stage('Run TestProject1 tests') {
             steps {
-                bat '''
-                echo "Running TestProject1 tests"
-                dotnet test TestProject1/TestProject1.csproj --verbosity normal
-                '''
+                bat 'dotnet test TestProject1/TestProject1.csproj --logger "trx;LogFileName=TestResults.trx"' 
             }
         }
 
         stage('Run TestProject2 tests') {
-            steps {
-                bat '''
-                echo "Running TestProject2 tests"
-                dotnet test TestProject2/TestProject2.csproj --verbosity normal
-                '''
+           steps {
+                bat 'dotnet test TestProject2/TestProject2.csproj --logger "trx;LogFileName=TestResults.trx"' 
             }
         }
 
         stage('Run TestProject3 tests') {
             steps {
-                bat '''
-                echo "Running TestProject3 tests"
-                dotnet test TestProject3/TestProject3.csproj --verbosity normal
-                '''
+                bat 'dotnet test TestProject3/TestProject3.csproj --logger "trx;LogFileName=TestResults.trx"' 
             }
         }
     }
@@ -63,7 +54,10 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: '**/TestResults/*.trx', allowEmptyArchive: true
-            junit '**/TestResults/*.trx'
+            step([
+                $class: 'MSTestPublisher',
+                testResultsFile: '**/TestResults/*.trx'
+            ])
         }
     }
 }
